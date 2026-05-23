@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velmorth - پسیار و وڵام</title>
+<link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold-dark: #B8860B;
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a2e;
+    --card: #16213e;
+    --text: #e8e8f0;
+    --text2: #a0a0b8;
+    --green: #00ff88;
+    --red: #ff4466;
+    --medium-c: #ff8800;
+    --easy: #00cc66;
+    --hard: #ff2244;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Scheherazade New', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 18px;
+  }
+  body::before {
+    content:'';
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(68,136,255,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(153,68,255,0.08) 0%, transparent 50%);
+    pointer-events:none; z-index:0;
+  }
+
+  #landing {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; min-height:100vh; padding:2rem; position:relative; z-index:1;
+  }
+  .logo-area { text-align:center; margin-bottom:2.5rem; animation:fadeDown 0.8s ease; }
+  .logo-title {
+    font-size: clamp(3rem,10vw,6rem); font-weight:700; letter-spacing:0.1em;
+    background:linear-gradient(135deg,var(--gold),#fff,var(--gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    filter:drop-shadow(0 0 30px rgba(255,215,0,0.4));
+    font-family: 'Arial Black', sans-serif;
+  }
+  .logo-sub { font-size:1.2rem; color:var(--text2); margin-top:0.5rem; }
+  .creator-badge {
+    display:inline-block;
+    background:linear-gradient(135deg,var(--gold-dark),var(--gold));
+    color:#000; padding:0.3rem 1.2rem; border-radius:50px;
+    font-size:1rem; font-weight:700; margin-top:1rem;
+  }
+  .categories-grid {
+    display:grid; grid-template-columns:repeat(2,1fr);
+    gap:1.2rem; max-width:580px; width:100%;
+    animation:fadeUp 0.8s ease 0.2s both;
+  }
+  .cat-card {
+    background:var(--card); border:1px solid rgba(255,215,0,0.15);
+    border-radius:20px; padding:2rem 1.5rem; text-align:center;
+    cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;
+  }
+  .cat-card:hover { transform:translateY(-5px); border-color:var(--gold); box-shadow:0 10px 40px rgba(255,215,0,0.2); }
+  .cat-icon { font-size:2.5rem; margin-bottom:0.8rem; display:block; }
+  .cat-name { font-size:1.3rem; font-weight:700; color:var(--gold); }
+  .cat-count { font-size:0.9rem; color:var(--text2); margin-top:0.3rem; }
+
+  #quiz-page { display:none; min-height:100vh; padding:1.2rem; position:relative; z-index:1; }
+
+  .quiz-header {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;
+  }
+  .back-btn {
+    background:var(--card); border:1px solid rgba(255,215,0,0.3);
+    color:var(--gold); padding:0.5rem 1rem; border-radius:10px;
+    cursor:pointer; font-family:'Scheherazade New',serif; font-size:1rem; transition:all 0.2s;
+  }
+  .back-btn:hover { background:rgba(255,215,0,0.1); }
+  .quiz-info { display:flex; align-items:center; gap:0.8rem; }
+  .q-counter {
+    background:var(--card); border:1px solid rgba(255,215,0,0.3);
+    border-radius:10px; padding:0.4rem 0.9rem; font-size:1rem; color:var(--gold); font-weight:700;
+  }
+  .score-display {
+    background:linear-gradient(135deg,var(--gold-dark),var(--gold));
+    color:#000; border-radius:10px; padding:0.4rem 0.9rem; font-size:1rem; font-weight:700;
+  }
+
+  .level-banner {
+    text-align:center; padding:0.5rem; border-radius:12px; margin-bottom:1rem; font-size:1.1rem; font-weight:700;
+  }
+  .banner-easy { background:rgba(0,204,102,0.15); color:var(--easy); border:1px solid rgba(0,204,102,0.3); }
+  .banner-medium { background:rgba(255,136,0,0.15); color:var(--medium-c); border:1px solid rgba(255,136,0,0.3); }
+  .banner-hard { background:rgba(255,34,68,0.15); color:var(--hard); border:1px solid rgba(255,34,68,0.3); }
+
+  .progress-bar { background:var(--card); border-radius:10px; height:6px; margin-bottom:1rem; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold-dark),var(--gold)); border-radius:10px; transition:width 0.5s ease; }
+
+  .timer-container { text-align:center; margin-bottom:1rem; }
+  .timer-circle {
+    width:80px; height:80px; border-radius:50%; margin:0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.8rem; font-weight:900; position:relative; transition:all 0.3s;
+  }
+  .timer-circle svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
+  .timer-num { position:relative; z-index:1; }
+  .timer-ok { color:var(--green); }
+  .timer-warn { color:var(--medium-c); }
+  .timer-danger { color:var(--red); animation:pulse 0.5s infinite; }
+
+  .question-card {
+    background:var(--card); border:1px solid rgba(255,215,0,0.15);
+    border-radius:20px; padding:1.5rem; margin-bottom:1rem; animation:fadeIn 0.4s ease;
+  }
+  .question-text { font-size:1.3rem; font-weight:600; line-height:1.8; color:var(--text); }
+
+  .options-list { display:flex; flex-direction:column; gap:0.7rem; }
+  .option-btn {
+    background:var(--card); border:2px solid rgba(255,215,0,0.15);
+    border-radius:14px; padding:0.9rem 1rem; text-align:right;
+    cursor:pointer; font-family:'Scheherazade New',serif; font-size:1.15rem;
+    color:var(--text); transition:all 0.2s;
+    display:flex; align-items:center; gap:0.8rem; width:100%;
+  }
+  .option-btn:hover:not(:disabled) { border-color:var(--gold); background:rgba(255,215,0,0.08); }
+  .option-letter {
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; color:var(--gold); font-size:1rem; flex-shrink:0;
+  }
+  .option-btn.correct { border-color:var(--green); background:rgba(0,255,136,0.1); animation:correctPop 0.4s ease; }
+  .option-btn.correct .option-letter { background:var(--green); color:#000; border-color:var(--green); }
+  .option-btn.wrong { border-color:var(--red); background:rgba(255,68,102,0.1); animation:shake 0.4s ease; }
+  .option-btn.wrong .option-letter { background:var(--red); color:#fff; border-color:var(--red); }
+  .option-btn:disabled { cursor:not-allowed; opacity:0.8; }
+
+  .result-overlay {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.85); display:flex; align-items:center;
+    justify-content:center; z-index:100; animation:fadeIn 0.3s ease; backdrop-filter:blur(10px);
+  }
+  .result-card {
+    background:var(--bg3); border:2px solid var(--gold);
+    border-radius:24px; padding:2.5rem 2rem; text-align:center;
+    max-width:400px; width:90%; animation:scaleIn 0.4s ease;
+    box-shadow:0 0 60px rgba(255,215,0,0.3);
+  }
+  .result-emoji { font-size:3.5rem; margin-bottom:0.8rem; }
+  .result-title { font-size:1.8rem; font-weight:700; color:var(--gold); margin-bottom:0.5rem; }
+  .result-score { font-size:3rem; font-weight:900; margin:0.8rem 0; }
+  .result-score span { font-size:1.1rem; color:var(--text2); }
+  .result-msg { color:var(--text2); margin-bottom:1.5rem; line-height:1.8; font-size:1.1rem; }
+  .stars { font-size:1.8rem; margin:0.5rem 0; }
+  .result-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+  .btn-primary {
+    background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#000;
+    border:none; border-radius:12px; padding:0.7rem 1.5rem;
+    font-family:'Scheherazade New',serif; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.2s;
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(255,215,0,0.4); }
+  .btn-secondary {
+    background:var(--card); color:var(--text); border:1px solid rgba(255,215,0,0.3);
+    border-radius:12px; padding:0.7rem 1.5rem;
+    font-family:'Scheherazade New',serif; font-size:1.1rem; font-weight:600; cursor:pointer; transition:all 0.2s;
+  }
+  .btn-secondary:hover { border-color:var(--gold); }
+
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes scaleIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+  @keyframes correctPop { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .particle { position:fixed; pointer-events:none; border-radius:50%; animation:particleFly 1s ease-out forwards; z-index:200; }
+  @keyframes particleFly { 0%{opacity:1;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)} }
+</style>
+</head>
+<body>
+
+<div id="landing">
+  <div class="logo-area">
+    <div class="logo-title">VELMORTH</div>
+    <div class="logo-sub">وێبسایتی پسیار و وڵام</div>
+    <div class="creator-badge">دروستکراوی دلێر</div>
+  </div>
+  <div class="categories-grid">
+    <div class="cat-card" onclick="startCategory('sports')">
+      <span class="cat-icon">⚽</span>
+      <div class="cat-name">وەرزش</div>
+      <div class="cat-count">٤٥ پسیار</div>
+    </div>
+    <div class="cat-card" onclick="startCategory('history')">
+      <span class="cat-icon">🏛️</span>
+      <div class="cat-name">مێژوو</div>
+      <div class="cat-count">٤٥ پسیار</div>
+    </div>
+    <div class="cat-card" onclick="startCategory('flags')">
+      <span class="cat-icon">🌍</span>
+      <div class="cat-name">مێژوو</div>
+      <div class="cat-count">٤٥ پسیار</div>
+    </div>
+    <div class="cat-card" onclick="startCategory('islam')">
+      <span class="cat-icon">🕌</span>
+      <div class="cat-name">ئایینی ئیسلام</div>
+      <div class="cat-count">٤٥ پسیار</div>
+    </div>
+  </div>
+</div>
+
+<div id="quiz-page">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="showLanding()">← گەڕانەوە</button>
+    <div class="quiz-info">
+      <div class="q-counter" id="q-counter">١ / ٤٥</div>
+      <div class="score-display">⭐ <span id="score-num">0</span></div>
+    </div>
+  </div>
+
+  <div class="level-banner" id="level-banner"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <div class="timer-container">
+    <div class="timer-circle" id="timer-circle">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,215,0,0.1)" stroke-width="4"/>
+        <circle cx="40" cy="40" r="35" fill="none" stroke="currentColor" stroke-width="4"
+          stroke-dasharray="219.9" stroke-dashoffset="0" id="timer-arc" stroke-linecap="round"/>
+      </svg>
+      <span class="timer-num" id="timer-num">15</span>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-text" id="question-text"></div>
+  </div>
+  <div class="options-list" id="options-list"></div>
+</div>
+
+<script>
+const LETTERS = ['أ','ب','ج','د'];
+
+const data = {
+  sports: {
+    name: 'وەرزش',
+    easy: [
+      {q:'یاری تۆپی پێ لە چەند گێم پێکهاتووە؟',a:'٢ گێم',o:['١ گێم','٢ گێم','٣ گێم','٤ گێم']},
+      {q:'هەر گێمێکی تۆپی پێ چەند خولەکە؟',a:'٤٥ خولەک',o:['٣٠ خولەک','٤٠ خولەک','٤٥ خولەک','٦٠ خولەک']},
+      {q:'لە هەر تیپێکدا چەند یاریزان لەناو یاریگادان؟',a:'١١ یاریزان',o:['٩ یاریزان','١٠ یاریزان','١١ یاریزان','١٢ یاریزان']},
+      {q:'کێ بەرپرسی سەرەکییە لە بەڕێوەبردنی یارییەکە؟',a:'حەکەم',o:['کابتن','حەکەم','مەنیجەر','ئەمین']},
+      {q:'ئامانجی سەرەکی تۆپی پێ چییە؟',a:'دانانی گۆڵ',o:['پاراستن','دانانی گۆڵ','بازدان','کردنی کۆرنەر']},
+      {q:'کێ تەنها کەسە ڕێگەی پێدراوە بە دەست تۆپەکە بگرێت؟',a:'گۆڵپارێز',o:['دیفینسەر','مەیدانیان','گۆڵپارێز','کابتن']},
+      {q:'ئەو کارتەی بۆ دەرکردنی یاریزان بەکاردێت چییە؟',a:'کارتی سوور',o:['کارتی زەرد','کارتی سوور','کارتی شین','کارتی ڕەش']},
+      {q:'کارت بۆ ئاگادارکردنەوەی یاریزان چییە؟',a:'کارتی زەرد',o:['کارتی سوور','کارتی زەرد','کارتی شین','کارتی سپی']},
+      {q:'گەورەترین پاڵەوانێتی یانەکان لە ئەوروپا چییە؟',a:'چامپیۆنز لیگ',o:['یوروپا لیگ','سوپەرکاپ','چامپیۆنز لیگ','کۆنفەرەنس لیگ']},
+      {q:'یاری کۆتایی جامی جیهانی چەند ساڵ جارێک دەکرێت؟',a:'هەر ٤ ساڵ',o:['هەر ٢ ساڵ','هەر ٣ ساڵ','هەر ٤ ساڵ','هەر ٦ ساڵ']},
+      {q:'لە یاری باسکەدا تۆپەکە دەخرێتە ناو چی؟',a:'سەبەت',o:['دەروازە','نەت','سەبەت','ڕینگ']},
+      {q:'یاری تێنس لە چەند کەس پێکهاتووە؟',a:'٢ یان ٤',o:['١ یان ٢','٢ یان ٤','٣ یان ٦','٢ یان ٣']},
+      {q:'بۆکسێنەر دەبێت چی لە دەستەکانی بکات؟',a:'دەستکێش بپۆشێت',o:['باندی ببەستێت','دەستکێش بپۆشێت','دەستکێشی هەڵبگرێت','هیچ']},
+      {q:'خولی ئیسپانیا بە چی دەناسرێت؟',a:'لالیگا',o:['پریمیەرلیگ','لالیگا','سێری ئەی','بوندسلیگا']},
+      {q:'خولی ئینگلیزی بە چی دەناسرێت؟',a:'پریمیەرلیگ',o:['لالیگا','سێری ئەی','پریمیەرلیگ','لیگ ١']},
+    ],
+    medium: [
+      {q:'یەکەم جامی جیهانی تۆپی پێ لە کام وڵات ئەنجامدرا؟',a:'ئوروگوای',o:['بەرازیل','فەرەنسا','ئوروگوای','ئیتالیا']},
+      {q:'کام یانە زۆرترین جار نازناوی چامپیۆنز لیگی بەدەستهێناوە؟',a:'ڕیال مادرید',o:['بارسەلۆنا','ڕیال مادرید','میلان','بایەرن']},
+      {q:'کام وڵات بۆ یەکەمجار لە مێژوودا جامی جیهانی بردەوە؟',a:'ئوروگوای',o:['بەرازیل','ئیتالیا','ئوروگوای','ئەرجەنتین']},
+      {q:'ناوی ئەو یاریزانەی کە بە "پادشای تۆپی پێ" ناسراوە چییە؟',a:'پێلێ',o:['مارادۆنا','پێلێ','رۆنالدۆ','مێسی']},
+      {q:'کام یانە بە "خانمە پیرەکە" ناسراوە؟',a:'یوڤینتوس',o:['میلان','ئینتەر','یوڤینتوس','ڕۆما']},
+      {q:'خەڵاتی "پوشکاش" بۆ چی دەدرێت؟',a:'جوانترین گۆڵی ساڵ',o:['باشترین یاریزان','زۆرترین گۆڵ','جوانترین گۆڵی ساڵ','باشترین گۆڵپارێز']},
+      {q:'ناوی یاریگای تایبەتی یانەی ئەی سی میلان چییە؟',a:'سان سیرۆ',o:['بەرنابێو','وەمبلی','سان سیرۆ','ئانفیلد']},
+      {q:'کام تیپ بە "شەیتانە سوورەکان" ناسراوە؟',a:'مانچستەر یونایتەد',o:['لیڤەرپووڵ','ئارسەنال','مانچستەر یونایتەد','چێلسی']},
+      {q:'یاری "ماراسۆن" چەند کیلۆمەترە؟',a:'٤٢.١٩٥ کم',o:['٣٠ کم','٤٠ کم','٤٢.١٩٥ کم','٥٠ کم']},
+      {q:'"بوندسلیگا" ناوی خولی کام وڵاتە؟',a:'ئەڵمانیا',o:['ئەوستریا','سوییس','ئەڵمانیا','هۆڵەندا']},
+      {q:'لە تۆپی پێدا "هاتریك" واتای چییە؟',a:'٣ گۆڵ لە یەک یاری',o:['٢ گۆڵ لە یەک یاری','٣ گۆڵ لە یەک یاری','٤ گۆڵ لە یەک یاری','٥ گۆڵ لە یەک یاری']},
+      {q:'"لیگ ١" ناوی خولی کام وڵاتە؟',a:'فەرەنسا',o:['بێلجیک','فەرەنسا','هۆڵەندا','پۆرتوگاڵ']},
+      {q:'یاری "سۆمۆ" سەر بە کلتووری کام وڵاتە؟',a:'ژاپۆن',o:['چین','کۆریا','ژاپۆن','مۆنگۆلیا']},
+      {q:'خولی "سێری ئەی" لە کام وڵات بەڕێوەدەچێت؟',a:'ئیتالیا',o:['ئیسپانیا','فەرەنسا','ئیتالیا','پۆرتوگاڵ']},
+      {q:'وڵاتی "کەنەدا" بە کام وەرزشی سەهۆڵین بەناوبانگە؟',a:'هۆکی',o:['باسکێت','هۆکی','بێیسبۆڵ','ئامریکی فوتبۆڵ']},
+    ],
+    hard: [
+      {q:'گۆڵپارێزێک کە بە "جاڵجاڵۆکەی ڕەش" ناسرابوو کێ بوو؟',a:'لێو یاشین',o:['پیتەر شمایکل','لێو یاشین','گۆردۆن بانکس','دینۆ زۆف']},
+      {q:'یەکەم یاریزانی ئەفریقی کە تۆپی ئاڵتوونی بەدەستهێنا کێ بوو؟',a:'جورج ویا',o:['دیدییە دروگبا','ساموێل ئیتۆ','جورج ویا','ریادح محرز']},
+      {q:'درێژترین ماوەی بێ دۆڕاندن لە خولی ئینگلیزی هی کام تیپ بوو؟',a:'ئارسەنال',o:['چێلسی','مانچستەر سیتی','ئارسەنال','لیڤەرپووڵ']},
+      {q:'خێراترین گۆڵ لە مێژووی مۆندیالدا لە چەندەمین چرکەدا تۆمارکراوە؟',a:'چرکەی ١١',o:['چرکەی ٨','چرکەی ١١','چرکەی ١٥','چرکەی ٢٠']},
+      {q:'کام یاریزان خاوەنی زۆرترین گۆڵە لە مێژووی مۆندیالەکان؟',a:'میرۆسلاڤ کلۆزە',o:['رۆنالدۆ بەرازیلی','گێرد مولەر','میرۆسلاڤ کلۆزە','یوستافۆن فۆنتین']},
+      {q:'وڵاتی "سان مارینۆ" بۆچی لە مێژووی تۆپی پێدا ناوبانگی هەیە؟',a:'زۆرترین دۆڕانی پەی پەی',o:['یەکەم جام بردووە','زۆرترین دۆڕانی پەی پەی','باشترین یاریگا','زیاترین یاریزان']},
+      {q:'ناوی ئەو یاریزانەی کە بە "بێژووی فەرەنسی" ناسراوە چییە؟',a:'زیدان',o:['هێنری','پلاتینی','زیدان','کانتێ']},
+      {q:'یاسای "ئۆفساید" واتای چییە؟',a:'یاریزان پێش تۆپ و دواتر دووهەمین دیفینسەرە',o:['یاریزان پشت گۆڵپارێزە','یاریزان پێش تۆپ و دواتر دووهەمین دیفینسەرە','یاریزان لە ناو دەروازەدایە','یاریزان دەرەوەی یاریگایە']},
+      {q:'لە یاری تێنسدا "ئەیس" (Ace) چییە؟',a:'سێرڤ نەدراوی پڕ',o:['نەت لەسەر سێرڤ','سێرڤ نەدراوی پڕ','دوو خاڵ بەیەکەوە','کۆتایی ستی']},
+      {q:'یاریزانی باسکە کاتێک تۆپەکە لە ناو دەستیدا دەبات و ڕادەکات پێی دەڵێن چی؟',a:'لەی-ئاپ',o:['دانک','لەی-ئاپ','پیڤۆت','پاس']},
+      {q:'لە بۆکسێندا کاتێک یاریزانێک دەکەوێت و ناتوانێت هەڵبستێتەوە پێی دەڵێن چی؟',a:'نۆک-ئاوت',o:['نۆک-داون','نۆک-ئاوت','تی-کێ-ئۆ','ڕێفەری ستۆپ']},
+      {q:'کێ ڕیکۆردی جیهانی بازدانی بەرز بە ناوی خۆیەوە تۆمار کردووە؟',a:'موتاز عیسا بەرشیم',o:['ئیوان یوشچینکۆ','ستیفان هۆلم','موتاز عیسا بەرشیم','چارلز أوستین']},
+      {q:'لە یاری باسکەدا هەر سەلەیەک چەند خاڵی هەیە لە دەرەوەی هێڵی سێ خاڵییەوە؟',a:'٣ خاڵ',o:['١ خاڵ','٢ خاڵ','٣ خاڵ','٤ خاڵ']},
+      {q:'کام وڵات زۆرترین جار جامی جیهانی ڕەگبی بردووەتەوە؟',a:'نیوزیلەندا',o:['ئەوستەرالیا','نیوزیلەندا','سەفریقا','ئینگلتەرا']},
+      {q:'یەکەم یاریزان کێ بوو ٨ تۆپی ئاڵتوونی بەدەستهێنا؟',a:'لیۆنێل مێسی',o:['رۆنالدۆ','زیدان','رۆنالدینیۆ','لیۆنێل مێسی']},
+    ]
+  },
+  history: {
+    name: 'مێژوو',
+    easy: [
+      {q:'لە چی ساڵێکدا جەنگی جیهانی دووەم کۆتایی هات؟',a:'١٩٤٥',o:['١٩٤٣','١٩٤٤','١٩٤٥','١٩٤٦']},
+      {q:'ناوی ئەو پاشایەی کە میسری کۆنی بە یەکخست چی بوو؟',a:'منەس',o:['فیرعەون','ڕامسیس','منەس','تۆتمەس']},
+      {q:'لە کام شاردا پیرەمیدە هەن؟',a:'گیزە',o:['قاهیرە','ئەسکەندەریە','گیزە','لوقسور']},
+      {q:'ناوی ئایینی سەردەمی ساسانییەکان لە ئێران چی بوو؟',a:'زەردەشتییەت',o:['موسیلمانی','مەسیحییەت','زەردەشتییەت','بووددییەت']},
+      {q:'میرنشینی سۆران لە چ سەدەیەکدا گەشەی کرد؟',a:'سەدەی ١٩',o:['سەدەی ١٦','سەدەی ١٧','سەدەی ١٨','سەدەی ١٩']},
+      {q:'ناوی یەکەم خەلیفەی ئیسلامی چی بوو؟',a:'ئەبووبەکر',o:['عومەر','عوسمان','عەلی','ئەبووبەکر']},
+      {q:'وڵاتی یۆنانی کۆن بەچی ناسراوە؟',a:'بنەمەی ئازادی و دیموکراسی',o:['وڵاتی فیرعەونەکان','بنەمەی ئازادی و دیموکراسی','وڵاتی پیاوانی شەڕ','وڵاتی زانست']},
+      {q:'ناوی ئەو سەرکردەیەی کە زۆربەی جیهانی کۆنی داگیر کرد چی بوو؟',a:'ئیسکەندەری مەزن',o:['نەپۆلیۆن','چینگیزخان','ئیسکەندەری مەزن','سایروس']},
+      {q:'دەوڵەتی عوسمانی چەند ساڵ مایەوە؟',a:'٦٠٠ ساڵ',o:['٣٠٠ ساڵ','٤٠٠ ساڵ','٥٠٠ ساڵ','٦٠٠ ساڵ']},
+      {q:'ناوی ئەو وڵاتەی کە شۆڕشی پیشەسازی تێدا دەستی پێکرد چی بوو؟',a:'ئینگلتەرا',o:['فەرەنسا','ئەڵمانیا','ئینگلتەرا','ئەمریکا']},
+      {q:'قەڵای هەولێر یەکێکە لە کۆنترین قەڵاکانی جیهان؟',a:'بەڵێ',o:['بەڵێ','نەخێر','دیاری نیە','تازەیە']},
+      {q:'ناوی وڵاتی فیرعەونەکان چییە؟',a:'میسر',o:['عێراق','سووریا','میسر','ئوردن']},
+      {q:'لە کام سەردەمەدا مرۆڤ دەستی کرد بە کشتوکاڵ؟',a:'سەردەمی نێوین',o:['سەردەمی بەرد','سەردەمی نێوین','سەردەمی ئاسن','سەردەمی برۆنز']},
+      {q:'پایتەختی عەباسییەکان چییە؟',a:'بەغدا',o:['دەمەشق','قاهیرە','بەغدا','ئیسفەهان']},
+      {q:'چەکی ئەتۆمی لە کۆتایی کام جەنگدا بەکارهات؟',a:'جەنگی جیهانی دووەم',o:['جەنگی کۆریا','جەنگی ڤیەتنام','جەنگی جیهانی یەکەم','جەنگی جیهانی دووەم']},
+    ],
+    medium: [
+      {q:'میرنشینی سۆران لەلایەن کێوە پایتەختەکەی گواسترایەوە بۆ ڕواندز؟',a:'محمد کوڕ خوسرەو',o:['عبدولرەحمان پاشا','محمد کوڕ خوسرەو','ئیسماعیل پاشا','میر عەلی']},
+      {q:'ناوی بەڵگەنامەی ١٢١٥ی بەریتانیا کە مافی مرۆڤی دیاریکرد چییە؟',a:'ماگنا کارتا',o:['کۆنستیتووشن','ماگنا کارتا','بیل ئۆف ڕایتس','هابیاس کۆرپوس']},
+      {q:'ئیمپراتۆرییەتی ڕۆم لە چ ساڵێکدا کۆتایی هات؟',a:'٤٧٦',o:['٤٥٣','٤٧٦','٤٨٠','٥٠٠']},
+      {q:'شۆڕشی فەرەنسا لە کام ساڵدا دەستی پێکرد؟',a:'١٧٨٩',o:['١٧٦٥','١٧٨٩','١٧٩٢','١٨٠٠']},
+      {q:'لە چ سەدەیەکدا ئیسلام گەیشتە ناوچەی کوردستان؟',a:'سەدەی ٧',o:['سەدەی ٥','سەدەی ٦','سەدەی ٧','سەدەی ٨']},
+      {q:'ناوی پاشای بەهێزی میرنشینی سۆران چییە؟',a:'میر محمد کوڕ خوسرەو',o:['میر عبدولرەحمان','میر محمد کوڕ خوسرەو','میر ئیسماعیل','میر عومەر']},
+      {q:'جەنگی قادسیە لە نێوان کێ و کێ ڕوویدا؟',a:'عەرەب و ساسانییەکان',o:['عەرەب و رۆمانییەکان','عەرەب و ساسانییەکان','عەرەب و بیزەنتییەکان','عەرەب و تورکەکان']},
+      {q:'کێ بوو ئەمریکای دۆزییەوە؟',a:'کریستۆف کۆلۆمب',o:['ماژەلان','ڤاسکۆ دا گاما','کریستۆف کۆلۆمب','جیمس کووک']},
+      {q:'سەردەمی "تاریکی" لە ئەوروپا چ کاتێک بوو؟',a:'سەدەی ٥ تا ١٠',o:['سەدەی ١ تا ٥','سەدەی ٥ تا ١٠','سەدەی ١٠ تا ١٥','سەدەی ١٥ تا ١٨']},
+      {q:'کێ یاسای کێشکردنی دۆزییەوە؟',a:'نیوتن',o:['گالیلێۆ','ئارشیمید','نیوتن','کۆپرنیکۆس']},
+      {q:'بەعسییەکان لە چ ساڵێکدا هاتنە سەر دەسەڵات لە عێراق؟',a:'١٩٦٨',o:['١٩٥٨','١٩٦٣','١٩٦٨','١٩٧٢']},
+      {q:'لە کام ساڵدا دیواری بەرلین ڕووخێنرا؟',a:'١٩٨٩',o:['١٩٨٥','١٩٨٧','١٩٨٩','١٩٩١']},
+      {q:'ناوی سەرکردەی کورد کە شەڕی دژی خاچپەرستەکانی کرد چییە؟',a:'صەلاحەددینی ئەیووبی',o:['نووری سەعید','قاسم','صەلاحەددینی ئەیووبی','ئیبراهیمی پاشا']},
+      {q:'ئیمپراتۆرییەتی ساسانی لەسەر دەستی کێ کۆتایی هات؟',a:'عەرەبەکان',o:['ڕۆمانییەکان','مەغۆلەکان','عەرەبەکان','تورکەکان']},
+      {q:'ڕێككەوتنی "سایكس پیكۆ" لە چ ساڵێكدا واژۆكرا؟',a:'١٩١٦',o:['١٩١٤','١٩١٦','١٩١٨','١٩٢٠']},
+    ],
+    hard: [
+      {q:'لە چ ساڵێکدا کتێبخانەی بەغدا لەلایەن مەغۆلەکانەوە سووتێنرا؟',a:'١٢٥٨',o:['١٢٤٨','١٢٥٨','١٢٦٥','١٢٧٠']},
+      {q:'ناوی پەیماننامەی کۆتایی جەنگی سی ساڵە چییە؟',a:'پەیماننامەی وێستفالیا',o:['پەیماننامەی ڤێرسای','پەیماننامەی وێستفالیا','پەیماننامەی ئوترێخت','پەیماننامەی پاریس']},
+      {q:'میرنشینی بابان لە چ ساڵێکدا بە تەواوی هەڵوەشایەوە؟',a:'١٨٤٧',o:['١٨٢٠','١٨٣٥','١٨٤٧','١٨٦٠']},
+      {q:'ناوی پاشای سۆمەری کە یەکەم یاسای مێژوویی دانا؟',a:'ئوروناموو',o:['حامووڕابی','ئوروناموو','سارگون','نەرام-سین']},
+      {q:'جەنگی "هەزار ساڵە" لە نێوان کام دوو وڵات بوو؟',a:'بریتانیا و فەرەنسا',o:['ئەڵمانیا و فەرەنسا','بریتانیا و فەرەنسا','ڕۆم و کارتاژ','ئیسپانیا و پۆرتوگاڵ']},
+      {q:'ئیمپراتۆرییەتی بیزەنتی لە چ ساڵێکدا کۆتایی هات؟',a:'١٤٥٣',o:['١٤٠٠','١٤٢٥','١٤٥٣','١٤٧٥']},
+      {q:'کێ شۆڕشی پیشەسازی لە ڕووسیا بەرپاکرد؟',a:'لێنین',o:['ستالین','لێنین','تروتسکی','مارکس']},
+      {q:'لە چ سەدەیەکدا تاعوونی ڕەش ئەوروپای گرتەوە؟',a:'سەدەی ١٤',o:['سەدەی ١٢','سەدەی ١٣','سەدەی ١٤','سەدەی ١٥']},
+      {q:'کام گەل یەکەم نووسینیان داهێنا لە میسۆپۆتامیا؟',a:'سووماڵیەکان',o:['بابلییەکان','ئاشووریەکان','سووماڵیەکان','ئاككادییەکان']},
+      {q:'جەنگی حەوت ساڵە لە نێوان کام هێزەکاندا بوو؟',a:'بریتانیا-پرووس دژ فەرەنسا-ئەوستریا',o:['فەرەنسا-ئیسپانیا','بریتانیا-پرووس دژ فەرەنسا-ئەوستریا','ڕۆم-کارتاژ','ئەڵمانیا-فەرەنسا']},
+      {q:'لە چ ساڵێکدا دادگای نۆرێنبێرگ پێکهێنرا؟',a:'١٩٤٥',o:['١٩٤٤','١٩٤٥','١٩٤٦','١٩٤٧']},
+      {q:'ناوی ئەو ئیمپراتۆرەی ڕۆم کە مەسیحییەتی فەرمی کرد چی بوو؟',a:'کۆنستەنتین',o:['تیئۆدۆسیووس','کۆنستەنتین','دیۆکلیتیان','مارکۆس ئوورێلیووس']},
+      {q:'ئیمپراتۆرییەتی مەلایی لە کوێ بوو؟',a:'ئاسیای خۆرهەڵات',o:['ئەفریقا','ئەمریکای باشوور','ئاسیای خۆرهەڵات','ئەوروپا']},
+      {q:'لە چ ساڵێکدا یەکەم کۆمپیوتەری دیجیتاڵی دروستکرا؟',a:'١٩٤٥',o:['١٩٣٨','١٩٤٢','١٩٤٥','١٩٥٠']},
+      {q:'ناوی دەوڵەتی پێش ئیمپراتۆرییەتی هەمەنشینی لە ئێران چی بوو؟',a:'زەندییەکان',o:['ئەفشارییەکان','زەندییەکان','قاجارییەکان','سەفەوییەکان']},
+    ]
+  },
+  flags: {
+    name: 'مێژوو',
+    easy: [
+      {q:'پایتەختی عێراق کام شارەیە؟',a:'بەغدا',o:['بەسرە','موسڵ','بەغدا','کەرکووک']},
+      {q:'مرۆڤ بۆ هەناسەدان پێویستی بە چییە؟',a:'ئۆکسجین',o:['کاربۆن','نایتڕۆجن','ئۆکسجین','هایدرۆجن']},
+      {q:'گەورەترین هەسارەی کۆمەڵەی خۆر چییە؟',a:'جووپیتەر',o:['زوحەل','مەریخ','جووپیتەر','نەپتوون']},
+      {q:'ئاو لە چ پلەیەکدا دەکوڵێت؟',a:'١٠٠ پلەی سەدی',o:['٨٠ پلەی سەدی','٩٠ پلەی سەدی','١٠٠ پلەی سەدی','١١٠ پلەی سەدی']},
+      {q:'زەوی بە دەوری چی دەخولێتەوە؟',a:'خۆر',o:['مانگ','خۆر','جووپیتەر','تیمووز']},
+      {q:'نزیکترین ئەستێرە لە زەوی چییە؟',a:'خۆر',o:['پرۆکسیما سەنتاووری','خۆر','سیریوس','ئالفا سەنتاووری']},
+      {q:'ناوی ئەو ئاژەڵەی کە بە "کەشتیی بیابان" ناسراوە چییە؟',a:'شوتر',o:['فیل','ئەسپ','شوتر','جیراف']},
+      {q:'مرۆڤ چەند دڵی هەیە؟',a:'١ دڵ',o:['١ دڵ','٢ دڵ','٣ دڵ','٤ دڵ']},
+      {q:'گەورەترین ئۆقیانووسی جیهان چییە؟',a:'ئۆقیانووسی ئارام',o:['ئۆقیانووسی ئەتلەنتیک','ئۆقیانووسی ئارام','ئۆقیانووسی هیند','ئۆقیانووسی ئارکتیک']},
+      {q:'ڕەنگی ئاسمان لە ڕۆژدا چییە؟',a:'شین',o:['سپی','زەرد','شین','مۆر']},
+      {q:'ئۆکسجین گرنگترە یان کاربۆن دای ئۆکسید بۆ ژیانی مرۆڤ؟',a:'ئۆکسجین',o:['کاربۆن دای ئۆکسید','ئۆکسجین','هەردووکیان','هیچکام']},
+      {q:'گەورەترین کیشوەر لە ژمارەی دانیشتوو چییە؟',a:'ئاسیا',o:['ئەفریقا','ئەمریکا','ئاسیا','ئەوروپا']},
+      {q:'مانگ دەتوانێت خۆی ڕووناکی بەرهەم بهێنێت؟',a:'نەخێر',o:['بەڵێ','نەخێر','زمانیان هەیە','کاتێک']},
+      {q:'ناوی ئەو شلەیەی کە لە دەمارەکانی مرۆڤدا دەگەڕێت چییە؟',a:'خوێن',o:['ئاو','شیر','خوێن','پلازما']},
+      {q:'چەند وەرز لە ساڵێکدا هەیە؟',a:'٤ وەرز',o:['٢ وەرز','٣ وەرز','٤ وەرز','٦ وەرز']},
+    ],
+    medium: [
+      {q:'قووڵترین خاڵی زەریاکانی جیهان چییە؟',a:'گرووی ماریانا',o:['گرووی تۆنگا','گرووی ماریانا','گرووی پوئێرتۆریكۆ','گرووی سووندا']},
+      {q:'گازی سەرەکی بەرگەهەوای زەوی چییە؟',a:'نایتڕۆجن',o:['ئۆکسجین','کاربۆن دای ئۆکسید','نایتڕۆجن','ئارگۆن']},
+      {q:'ناوی ئەو ئامێرەی کە بوومەلەرزە پێ دەپێورێت چییە؟',a:'سیسمۆگراف',o:['بارۆمیتەر','تەرمۆمیتەر','سیسمۆگراف','ئانیمۆمیتەر']},
+      {q:'بۆچی ئەنتارکتیکا بە "کیشوەری سپی" ناسراوە؟',a:'بەهۆی داپۆشراوی بەفر',o:['بەهۆی ساردیەکەی','بەهۆی داپۆشراوی بەفر','بەهۆی کولکەکانی','بەهۆی جۆرافیاکەی']},
+      {q:'کێ یاسای یەکەمی بزاوتی داناوە؟',a:'نیوتن',o:['ئایینستاین','گالیلێۆ','نیوتن','کۆپرنیکۆس']},
+      {q:'جیاوازی نێوان ئاووهەوا و کەشوهەوا چییە؟',a:'ئاووهەوا کورتمەودا، کەشوهەوا درێژخایەنە',o:['هەردووکیان یەکسانن','ئاووهەوا کورتمەودا، کەشوهەوا درێژخایەنە','کەشوهەوا کورتمەودا','هیچ جیاوازییان نیە']},
+      {q:'کام وڵات زۆرترین دانیشتووی هەیە؟',a:'چین',o:['هیندستان','چین','ئەمریکا','ئیندۆنێزیا']},
+      {q:'ناوی ئەو هێڵەی کە زەوی دەکات بە دوو بەش چییە؟',a:'هێڵی ئیستیوا',o:['هێڵی سەفەر','هێڵی ئیستیوا','هێڵی گرینیچ','هێڵی بافل']},
+      {q:'گەردیلەی ئاو لە چی پێکهاتووە؟',a:'H2O دوو هایدرۆجن و یەک ئۆکسجین',o:['H2O2','HO','H2O دوو هایدرۆجن و یەک ئۆکسجین','H3O']},
+      {q:'ناوی ماددەی کە ڕووەکەکان بەهۆیەوە سەوز دەردەکەون چییە؟',a:'کلۆرۆفیل',o:['مێلانین','کلۆرۆفیل','کەروتین','هیمۆگلۆبین']},
+      {q:'خێرایی ڕووناکی خێراترە یان خێرایی دەنگ؟',a:'خێرایی ڕووناکی',o:['خێرایی دەنگ','هەردووکیان یەکسانن','خێرایی ڕووناکی','هیچکام']},
+      {q:'ناوی ئەو پایتەختەی کە بە شاری خۆشەویستی ناسراوە چییە؟',a:'پاریس',o:['ڤینا','ئیستانبوڵ','پاریس','ڕۆما']},
+      {q:'لە کام وڵاتدا تاجی تای ماهاڵ هەیە؟',a:'هیندستان',o:['پاکستان','ئەفغانستان','هیندستان','بەنگلادێش']},
+      {q:'ناوی ئەو ئامێرەی کە پلەی گەرمی دەپێوێت چییە؟',a:'تەرمۆمیتەر',o:['بارۆمیتەر','هایگرۆمیتەر','تەرمۆمیتەر','ئانیمۆمیتەر']},
+      {q:'چەند ئەندامی هەستیاری سەرەکی لە مرۆڤدا هەیە؟',a:'٥',o:['٣','٤','٥','٦']},
+    ],
+    hard: [
+      {q:'ناوی هێزی کۆکردنەوەی ئەستێرەکان لە گەلەستێرەدا چییە؟',a:'کێشی بارستانی',o:['کێشی ئەلیکتڕۆمەگنێتی','کێشی بارستانی','کێشی نیوکلیری','تواناکانی تاریک']},
+      {q:'تەنگەی هورمز پەیوەندی بە کام دوو ناوچەی ئاوییەوە هەیە؟',a:'کەڵەی فارس و دەریای عومان',o:['دەریای سورخ و کەڵەی عەدەن','کەڵەی فارس و دەریای عومان','دەریای مەدیتەرانە و دەریای ئەسود','کەڵەی بەنگاڵ']},
+      {q:'کێ تیۆری ڕێژەیی داهێنا؟',a:'ئایینستاین',o:['نیوتن','پلانک','ئایینستاین','هایزنبێرگ']},
+      {q:'ناوی ئەو بەشی خانەیەی کە بە پێکهێنەری ژیان ناسراوە چییە؟',a:'مایتۆکۆندریا',o:['ڕیبۆسۆم','نیوکلیووس','مایتۆکۆندریا','گۆڵجی']},
+      {q:'چەند جار کاتژمێرێک لە ڕۆژێکدا بە یەک دەگەن؟',a:'٢٢ جار',o:['١٢ جار','٢٢ جار','٢٤ جار','٤٤ جار']},
+      {q:'پەیماننامەی ئانتارکتیکا چی قەدەغە دەکات؟',a:'چالاکیی سەربازی و مادەی ئەتۆمی',o:['کردنی کار','هاتنی مرۆڤ','چالاکیی سەربازی و مادەی ئەتۆمی','تەحقیق']},
+      {q:'ناوی دیاردەی شکانی ڕووناکی لە گۆشەیەکەوە چییە؟',a:'شکاندن (Refraction)',o:['پیشاندان (Reflection)','شکاندن (Refraction)','چرکێشان (Diffraction)','دانەپڕاوە']},
+      {q:'ماددەی تاریک چییە و چەند لە گەردوون پێکدەهێنێت؟',a:'ماددەی نەناسراو، ٢٧٪',o:['ماددەی ئادی، ٥٪','گازی تاریک، ١٥٪','ماددەی نەناسراو، ٢٧٪','ئەنێرجیی تاریک، ٦٨٪']},
+      {q:'یەکەم کەس کە گەردەلوولی ئەتۆمی شی کردەوە کێ بوو؟',a:'ئێرنست ڕودەرفۆرد',o:['ماری کیووری','ئێرنست ڕودەرفۆرد','نیلز بۆر','جی جی تۆمسن']},
+      {q:'ناوی کەشتییە ئاسمانییەی کە دوورترین شوێنی بینیوە چییە؟',a:'ڤۆیەجەر ١',o:['هووبەل','جەیمز وێب','ڤۆیەجەر ١','نیو هۆرایزۆنز']},
+      {q:'لە کیمیادا کام توخم زۆرترین ئاڵۆزی هەیە لە پێکهاتەی ئۆرگانیکدا؟',a:'کاربۆن',o:['هایدرۆجن','ئۆکسجین','کاربۆن','نایتڕۆجن']},
+      {q:'کوانتەم چییە؟',a:'بچووکترین بەشی ئەنێرجی کە ناگوێزرێتەوە',o:['شەوەی ڕووناکی','بچووکترین بەشی ئەنێرجی کە ناگوێزرێتەوە','زیادکردنی ئەنێرجی','نیوکلیووسی ئەتۆم']},
+      {q:'خاڵی سفر چەندە بە پلەی سەدی؟',a:'-٢٧٣.١٥ پلەی سەدی',o:['-١٠٠ پلەی سەدی','-٢٠٠ پلەی سەدی','-٢٧٣.١٥ پلەی سەدی','-٣٠٠ پلەی سەدی']},
+      {q:'ناوی هێڵی گەردشی هەسارەکان بە دەوری خۆر چییە؟',a:'مەدار',o:['ئیکلیپتیک','مەدار','هێڵی گرینیچ','ئیكواتۆر']},
+      {q:'خێرایی ڕزگاربوون لە کێشکردنی زەوی چەندە؟',a:'١١.٢ کیلۆمەتر لە چرکەیەکدا',o:['٧.٩ کیلۆمەتر','١١.٢ کیلۆمەتر لە چرکەیەکدا','١٥ کیلۆمەتر','٨ کیلۆمەتر']},
+    ]
+  },
+  islam: {
+    name: 'ئایینی ئیسلام',
+    easy: [
+      {q:'ئیسلام چەند پایەی سەرەکی هەیە؟',a:'٥ پایە',o:['٣ پایە','٤ پایە','٥ پایە','٦ پایە']},
+      {q:'یەکەم پایەی ئیسلام چییە؟',a:'شاهادەت',o:['نوێژ','زەکات','شاهادەت','ڕۆژوو']},
+      {q:'موسڵمانان ڕۆژانە چەند جار نوێژ دەکەن؟',a:'٥ جار',o:['٣ جار','٤ جار','٥ جار','٦ جار']},
+      {q:'ناوی مانگی ڕۆژووی موسڵمانان چییە؟',a:'ڕەمەزان',o:['شەعبان','رەجەب','ڕەمەزان','مووحەڕەم']},
+      {q:'قیبلەی موسڵمانان دەکەوێتە کام شارەوە؟',a:'مەككە',o:['مەدینە','قودس','مەككە','بەغدا']},
+      {q:'ناوی کتێبی پیرۆزی موسڵمانان چییە؟',a:'قورئانی پیرۆز',o:['تەورات','زەبوور','قورئانی پیرۆز','ئینجیل']},
+      {q:'پێغەمبەری ئیسلام لە کام شار لەدایک بووە؟',a:'مەككە',o:['مەدینە','تائیف','مەككە','قودس']},
+      {q:'ئایینی ئیسلام لە چ سەدەیەکدا سەریهەڵدا؟',a:'سەدەی ٧',o:['سەدەی ٥','سەدەی ٦','سەدەی ٧','سەدەی ٨']},
+      {q:'زەکات بۆ کێ دەدرێت؟',a:'ئەو کەسانەی پێویستیان هەیە',o:['بای','ئەو کەسانەی پێویستیان هەیە','مزگەوت','حکوومەت']},
+      {q:'حەج بۆ کێ پێویستە؟',a:'ئەوانەی توانای مادی و لەشی هەیە',o:['باوەڕ تەنها','ئەوانەی توانای مادی و لەشی هەیە','زانست','ئیختیار']},
+      {q:'ناوی فریشتەی وەحی بۆ پێغەمبەر چی بوو؟',a:'جیبرائیل',o:['میکائیل','ئیسرافیل','جیبرائیل','عەزرائیل']},
+      {q:'باوەڕهێنان بە خودا چەندەمین ڕوکنی ئیمانە؟',a:'یەکەم',o:['یەکەم','دووەم','سێیەم','چوارەم']},
+      {q:'ئیسلام بانگەوازی بۆ چی دەکات؟',a:'ئەخلاق و دادپەروەری',o:['شەڕ','ئەخلاق و دادپەروەری','دارایی','دەسەڵات']},
+      {q:'ئایا موسڵمانان باوەڕیان بە پێغەمبەرانی پێشوو هەیە؟',a:'بەڵێ',o:['نەخێر','بەڵێ','هەندێک','ئایا بابەتەکە']},
+      {q:'ڕۆژی جەژنی ڕەمەزان دوای چی دێت؟',a:'دوای کۆتایی ڕەمەزان',o:['دوای نیوەی ڕەمەزان','دوای کۆتایی ڕەمەزان','دوای شەوی قەدر','دوای یەکی ڕەمەزان']},
+    ],
+    medium: [
+      {q:'ژمارەی ڕکعاتەکانی نوێژی عیشا چەندە؟',a:'٤ ڕکعات',o:['٢ ڕکعات','٣ ڕکعات','٤ ڕکعات','٥ ڕکعات']},
+      {q:'ناوی ساڵی کۆچی پێغەمبەر چییە؟',a:'ساڵی حوزن',o:['ساڵی فیل','ساڵی بعثەت','ساڵی حوزن','ساڵی هیجرەت']},
+      {q:'یەکەم پیاوێک کە ئیسلامی هێنا کێ بوو؟',a:'ئەبووبەکر',o:['عومەر','عوسمان','عەلی','ئەبووبەکر']},
+      {q:'ناوی کوڕی پێغەمبەر کە لە منداڵیدا کۆچی دوایی کرد چی بوو؟',a:'ئیبراهیم',o:['محمد','عبداللە','ئیبراهیم','قاسم']},
+      {q:'قورئانی پیرۆز لە ماوەی چەند ساڵدا دابەزیوە؟',a:'٢٣ ساڵ',o:['١٠ ساڵ','١٥ ساڵ','٢٣ ساڵ','٣٠ ساڵ']},
+      {q:'جەنگی بەدر لە چ ساڵێکی کۆچیدا ڕوویدا؟',a:'ساڵی ٢ی کۆچی',o:['ساڵی ١ی کۆچی','ساڵی ٢ی کۆچی','ساڵی ٣ی کۆچی','ساڵی ٤ی کۆچی']},
+      {q:'یەکەم مزگەوت لە ئیسلامدا چی ناوی بوو؟',a:'مزگەوتی قوبا',o:['مزگەوتی نەبەوی','مزگەوتی حەرام','مزگەوتی قوبا','مزگەوتی ئەقسا']},
+      {q:'خەلیفەی دووەمی موسڵمانان کێ بوو؟',a:'عومەر بن خەتاب',o:['ئەبووبەکر','عومەر بن خەتاب','عوسمان','عەلی']},
+      {q:'واتای وشەی ئیسلام چییە؟',a:'تەسلیمبوون بۆ خودا',o:['ئاشتی','باوەڕ','تەسلیمبوون بۆ خودا','عیبادەت']},
+      {q:'تەیموم کەی بەکاردێت؟',a:'کاتێک ئاو نەبێت',o:['هەموو کات','کاتێک ئاو نەبێت','کاتێک ناخوش بیت','کاتێک مەسافەر بیت']},
+      {q:'ژمارەی سوورەتەکانی قورئان چەندە؟',a:'١١٤ سوورەت',o:['١٠٠ سوورەت','١١٠ سوورەت','١١٤ سوورەت','١٢٠ سوورەت']},
+      {q:'ناوی دایکی پێغەمبەر چییە؟',a:'ئامنە',o:['خەدیجە','فاتیمە','ئامنە','زینەب']},
+      {q:'ئایەتی کورسی لە کام سوورەتدایە؟',a:'سوورەتی بەقەرە',o:['سوورەتی ئالی عیمران','سوورەتی نیسا','سوورەتی بەقەرە','سوورەتی ماعیدە']},
+      {q:'خەلیفەی چوارەمی موسڵمانان کێ بوو؟',a:'عەلی بن ئەبی تالیب',o:['عوسمان','عومەر','عەلی بن ئەبی تالیب','مووعاویە']},
+      {q:'ئایا ڕۆژووی ڕۆژی جەژن دروستە؟',a:'نەخێر، حەرامە',o:['بەڵێ دروستە','نەخێر، حەرامە','تەنها ئەگەر بیانەوێت','مەکرووهە']},
+    ],
+    hard: [
+      {q:'ناوی ئەو سوورەتەی قورئان کە بە دڵی قورئان ناسراوە چییە؟',a:'سوورەتی یاسین',o:['سوورەتی بەقەرە','سوورەتی ئالی عیمران','سوورەتی یاسین','سوورەتی کەهف']},
+      {q:'ناوی ئەو پێغەمبەرەی کە لە قورئاندا زۆرترین جار ناوی هاتووە کێیە؟',a:'موسا (ع)',o:['ئیبراهیم (ع)','عیسا (ع)','موسا (ع)','محمد (د.خ)']},
+      {q:'یەکەم نووسەری وەحی کێ بوو؟',a:'عەلی بن ئەبی تالیب',o:['زید بن ثابت','عبداللە بن مەسعوود','عەلی بن ئەبی تالیب','ئەبووبەکر']},
+      {q:'گەورەترین ئایەتی قورئان کامە و لە کام سوورەتەدا هاتووە؟',a:'ئایەتی کورسی، سوورەتی بەقەرە',o:['سوورەتی فاتیحە','ئایەتی کورسی، سوورەتی بەقەرە','سوورەتی ئیخلاس','سوورەتی فاتیر']},
+      {q:'ناوی ساڵی زۆرترین خەمباری پێغەمبەر چی بوو؟',a:'ساڵی حوزن',o:['ساڵی فیل','ساڵی بعثەت','ساڵی حوزن','ساڵی هیجرەت']},
+      {q:'حوکمی زەکات بۆ قەرزارەکان چییە؟',a:'ڕێگەی پێدراوە، لەمیانی ئەوانن',o:['حەرامە','مووباحە','ڕێگەی پێدراوە، لەمیانی ئەوانن','تەنها موسڵمان']},
+      {q:'شەڕی حەندق لە چ ساڵێکی کۆچیدا بوو؟',a:'ساڵی ٥ی کۆچی',o:['ساڵی ٣ی کۆچی','ساڵی ٤ی کۆچی','ساڵی ٥ی کۆچی','ساڵی ٦ی کۆچی']},
+      {q:'عومەری کوڕی عەبدولعەزیز بە چی بەناوبانگ بوو؟',a:'دادپەروەری و ئیصلاحاتی',o:['شەڕی زۆر','دادپەروەری و ئیصلاحاتی','فەتحی شار','کاریگەریی زۆر']},
+      {q:'ناوی ئەو سوورەتەی کە بەسمەلەی تێدا نییە چییە؟',a:'سوورەتی تەوبە',o:['سوورەتی نەحل','سوورەتی ئەنفال','سوورەتی تەوبە','سوورەتی حەشر']},
+      {q:'فەتحی مەككە لە چ ساڵێکی کۆچیدا ڕوویدا؟',a:'ساڵی ٨ی کۆچی',o:['ساڵی ٦ی کۆچی','ساڵی ٧ی کۆچی','ساڵی ٨ی کۆچی','ساڵی ٩ی کۆچی']},
+      {q:'ناوی ئەو ژنەی پێغەمبەر کە زۆرترین فەرموودەی گێڕاوەتەوە کێیە؟',a:'عائیشە (ر.ع)',o:['خەدیجە','زینەب','عائیشە (ر.ع)','حەفسە']},
+      {q:'یاسای میرات لە کام سوورەتی قورئاندا باسکراوە؟',a:'سوورەتی نیسا',o:['سوورەتی بەقەرە','سوورەتی ماعیدە','سوورەتی نیسا','سوورەتی ئانعام']},
+      {q:'کێ سەرکردایەتی موسڵمانانی لە جەنگی یەرمووک کرد؟',a:'خالید بن ڤەلید',o:['عومەر بن عاس','عومەر بن خەتاب','خالید بن ڤەلید','عبو عوبیدە']},
+      {q:'واتای مەككی و مەدەی لە سوورەتەکانی قورئان چییە؟',a:'دابەزیوە لە مەككە یان مەدینە',o:['جۆری ئایەتە','درێژی سوورەتە','دابەزیوە لە مەككە یان مەدینە','ژمارەی ئایەتەکان']},
+      {q:'ئیجتیهاد لە ئیسلامدا چییە؟',a:'هەوڵدانی فیقهی بۆ دۆزینەوەی حوکمی نوێ',o:['ڕۆژوو','نوێژی تایبەت','هەوڵدانی فیقهی بۆ دۆزینەوەی حوکمی نوێ','نووسینی قورئان']},
+    ]
+  }
+};
+
+let currentCat = '';
+let allQuestions = [];
+let qIndex = 0;
+let score = 0;
+let timer = null;
+let timeLeft = 15;
+let answered = false;
+
+const levelOrder = ['easy','medium','hard'];
+const levelNames = {easy:'🟢 ئاسان', medium:'🟡 مامناوەند', hard:'🔴 قورس'};
+const bannerClass = {easy:'banner-easy', medium:'banner-medium', hard:'banner-hard'};
+
+function showLanding() {
+  document.getElementById('landing').style.display = 'flex';
+  document.getElementById('quiz-page').style.display = 'none';
+  clearInterval(timer);
+}
+
+function startCategory(cat) {
+  currentCat = cat;
+  allQuestions = [
+    ...data[cat].easy.map(q=>({...q,level:'easy'})),
+    ...data[cat].medium.map(q=>({...q,level:'medium'})),
+    ...data[cat].hard.map(q=>({...q,level:'hard'}))
+  ];
+  qIndex = 0;
+  score = 0;
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('quiz-page').style.display = 'block';
+  document.getElementById('score-num').textContent = '0';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  if (qIndex >= allQuestions.length) { showResult(); return; }
+  answered = false;
+  const q = allQuestions[qIndex];
+  const total = allQuestions.length;
+
+  document.getElementById('q-counter').textContent = `${toK(qIndex+1)} / ${toK(total)}`;
+  document.getElementById('progress-fill').style.width = ((qIndex/total)*100)+'%';
+
+  const banner = document.getElementById('level-banner');
+  banner.textContent = levelNames[q.level];
+  banner.className = 'level-banner '+bannerClass[q.level];
+
+  document.getElementById('question-text').textContent = q.q;
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const shuffled = [...q.o].sort(()=>Math.random()-0.5);
+  shuffled.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${['أ','ب','ج','د'][i]}</span>${opt}`;
+    btn.onclick = ()=>selectAnswer(btn, opt, q.a);
+    list.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 15;
+  updateTimerUI();
+  timer = setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if(timeLeft<=0){ clearInterval(timer); if(!answered) timeUp(); }
+  },1000);
+}
+
+function updateTimerUI() {
+  document.getElementById('timer-num').textContent = timeLeft;
+  const arc = document.getElementById('timer-arc');
+  const num = document.getElementById('timer-num');
+  const pct = timeLeft/15;
+  arc.style.strokeDashoffset = 219.9*(1-pct);
+  const col = timeLeft>8?'var(--green)':timeLeft>4?'var(--medium-c)':'var(--red)';
+  arc.style.color = col;
+  num.className = 'timer-num '+(timeLeft>8?'timer-ok':timeLeft>4?'timer-warn':'timer-danger');
+}
+
+function selectAnswer(btn, selected, correct) {
+  if(answered) return;
+  answered = true;
+  clearInterval(timer);
+  disableAll();
+  if(selected===correct){
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('score-num').textContent = score;
+    spawnParticles(btn);
+  } else {
+    btn.classList.add('wrong');
+    highlightCorrect(correct);
+  }
+  setTimeout(()=>{ qIndex++; loadQuestion(); }, 1300);
+}
+
+function timeUp() {
+  answered = true;
+  disableAll();
+  highlightCorrect(allQuestions[qIndex].a);
+  setTimeout(()=>{ qIndex++; loadQuestion(); }, 1300);
+}
+
+function disableAll() {
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+}
+
+function highlightCorrect(correct) {
+  document.querySelectorAll('.option-btn').forEach(b=>{
+    if(b.textContent.includes(correct)) b.classList.add('correct');
+  });
+}
+
+function spawnParticles(el) {
+  const r = el.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  ['#FFD700','#00FF88','#FF88FF','#88FFFF'].forEach((c,i)=>{
+    for(let j=0;j<3;j++){
+      const p=document.createElement('div');
+      p.className='particle';
+      p.style.cssText=`left:${cx}px;top:${cy}px;width:8px;height:8px;background:${c};--tx:${(Math.random()-.5)*140}px;--ty:${(Math.random()-1.3)*120}px;`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),1000);
+    }
+  });
+}
+
+function showResult() {
+  const total = allQuestions.length;
+  const pct = Math.round((score/total)*100);
+  let emoji,msg,stars;
+  if(pct>=90){emoji='🏆';msg='فەوقەڵعادە! تۆ ئوستایی!';stars='⭐⭐⭐';}
+  else if(pct>=70){emoji='🎉';msg='زۆر باشت کرد!';stars='⭐⭐';}
+  else if(pct>=50){emoji='👍';msg='باشە، بەردەوام بە!';stars='⭐';}
+  else{emoji='💪';msg='هەوڵ بدەوە دووبارە!';stars='';}
+
+  const ov=document.createElement('div');
+  ov.className='result-overlay';
+  ov.innerHTML=`<div class="result-card">
+    <div class="result-emoji">${emoji}</div>
+    <div class="result-title">کۆتایی هات!</div>
+    <div class="stars">${stars}</div>
+    <div class="result-score">${toK(score)}<span> / ${toK(total)}</span></div>
+    <div class="result-msg">${msg}<br><small style="color:var(--gold)">${toK(pct)}٪ گۆڵی هێنا</small></div>
+    <div class="result-btns">
+      <button class="btn-primary" onclick="this.closest('.result-overlay').remove();startCategory('${currentCat}')">🔄 دووبارە</button>
+      <button class="btn-secondary" onclick="this.closest('.result-overlay').remove();showLanding()">🏠 سەرەتا</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
+function toK(n){return String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);}
+</script>
+</body>
+</html>
